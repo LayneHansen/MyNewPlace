@@ -290,6 +290,13 @@ function CreateListing() {
             multiple
             required
           />
+
+          <button 
+            className="primaryButton createListingButton"
+            type='submit'>
+              Create Listing
+          </button>
+          
         </form>
       </main>
     </div>
