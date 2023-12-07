@@ -82,8 +82,10 @@ function CreateListing() {
     let location
 
     if(geolocationEnabled) {
-      const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?
-        address=${address}&key=${process.env.REACT_APP_GEOCODE_API_KEY}`)
+      const response = await fetch(
+        //`https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${process.env.REACT_APP_GEOCODE_API_KEY}`
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=AIzaSyC6poeCPQdahNNHh7oCaflBxzha6fUPyOI`
+      )
 
         const data = await response.json()
 
@@ -107,44 +109,47 @@ function CreateListing() {
       location = address
     }
 
-    const storeImage = async (image) => {
-      return new Promise((resolve, reject) => {
-        const storage = getStorage()
-        const fileName = `${auth.currentUser.uid}-${image.name}-${uuidv4()}`
+// Store image in firebase
+const storeImage = async (image) => {
+  return new Promise((resolve, reject) => {
+    const storage = getStorage()
+    const fileName = `${auth.currentUser.uid}-${image.name}-${uuidv4()}`
 
-        const storageRef = ref(storage, 'images/' + fileName)
-        const uploadTask = uploadBytesResumable(storageRef, image)
+    const storageRef = ref(storage, 'images/' + fileName)
 
-        uploadTask.on(
-          'state_changed',
-          (snapshot) => {
-            const progress =
-              (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-            console.log('Upload is ' + progress + '% done')
-            switch (snapshot.state) {
-              case 'paused':
-                console.log('Upload is paused')
-                break
-              case 'running':
-                console.log('Upload is running')
-                break
-              default:
-                break
-            }
-          },
-          (error) => {
-            reject(error)
-          },
-          () => {
-            // Handle successful uploads on complete
-            // For instance, get the download URL: https://firebasestorage.googleapis.com/...
-            getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-              resolve(downloadURL)
-            })
-          }
-        )
-      })
-    }
+    const uploadTask = uploadBytesResumable(storageRef, image)
+
+    uploadTask.on(
+      'state_changed',
+      (snapshot) => {
+        const progress =
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+        console.log('Upload is ' + progress + '% done')
+        switch (snapshot.state) {
+          case 'paused':
+            console.log('Upload is paused')
+            break
+          case 'running':
+            console.log('Upload is running')
+            break
+          default:
+            break
+        }
+      },
+      (error) => {
+        reject(error)
+      },
+      () => {
+        // Handle successful uploads on complete
+        // For instance, get the download URL: https://firebasestorage.googleapis.com/...
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          resolve(downloadURL)
+        })
+      }
+    )
+  })
+}
+
     
     const imageUrls = await Promise.all(
       [...images].map((image) => storeImage(image))
