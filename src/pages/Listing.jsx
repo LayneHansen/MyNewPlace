@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet'
 import { getDoc, doc } from 'firebase/firestore'
 import { getAuth } from 'firebase/auth'
 import { db } from '../firebase.config'
@@ -33,6 +34,9 @@ function Listing() {
   if(loading) {
     return <Spinner />
   }
+
+  
+  console.log(listing)
 
   return (
     <main>
@@ -70,7 +74,7 @@ function Listing() {
           {listing.offer && (
             <p className='discountePrice'>
               ${listing.regularPrice - listing.discountedPrice}
-              discount
+              {' '} discount
             </p>
           )}
 
@@ -96,7 +100,25 @@ function Listing() {
             Location
           </p>
 
-          {/* MAP */}
+        <div className='leafletContainer'>
+          <MapContainer
+            style={{ height: '100%', width: '100%' }}
+            center={[listing.geoLocation.lat, listing.geoLocation.lng]}
+            zoom={13}
+            scrollWheelZoom={false}
+          >
+            <TileLayer
+              attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+              url='https://{s}.tile.openstreetmap.de/tiles/osmde/{z}/{x}/{y}.png'
+            />
+
+            <Marker
+              position={[listing.geoLocation.lat, listing.geoLocation.lng]}
+            >
+              <Popup>{listing.location}</Popup>
+            </Marker>
+          </MapContainer>
+        </div>
 
           {auth.currentUser?.uid !== listing.userRef && (
             <Link to={`/contact/${listing.userRef}?listingName=${listing.name}`} 
